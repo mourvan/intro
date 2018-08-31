@@ -1,28 +1,32 @@
 
 template <class T, class D>
-struct node_tr
+struct node_au
 {
 	T key;
 	D data;
-	node_tr<T,D>* parent;
-	node_tr<T,D>* left;
-	node_tr<T,D>* right;
-	node_tr();
-	node_tr(T kkey, D ddata);
+	node_au<T,D>* parent;
+	node_au<T,D>* left;
+	node_au<T,D>* right;
+	node_au<T,D>* succ;
+	node_au<T,D>* pred;
+	node_au();
+	node_au(T kkey, D ddata);
 };
 
 template <class T, class D>
-node_tr<T,D>::node_tr(T kkey, D ddata)
+node_au<T,D>::node_au(T kkey, D ddata)
 {
 	key = kkey;
 	data = ddata;
 	parent = nullptr;
 	left = nullptr;
 	right = nullptr;
+	succ = nullptr;
+	pred = nullptr;
 }
 
 template <class T, class D>
-node_tr<T,D>::node_tr()
+node_au<T,D>::node_au()
 {
 	parent = nullptr;
 	left = nullptr;
@@ -30,32 +34,34 @@ node_tr<T,D>::node_tr()
 }
 
 template <class T, class D>
-class BinarySearchTree : public basic_tree<node_tr<T,D>> //TODO: Trie, AVL, Treap
+class BSAUTree : public basic_tree<node_au<T,D>> //TODO: Trie, AVL, Treap
 {
-	//void inorder_tree_walk_r(node_tr<T,D>* x);
-	//void inorder_tree_walk_i();
-	node_tr<T,D>* search_r(T key, node_tr<T,D>* ptr);
-	node_tr<T,D>* search_i(T key);
-	node_tr<T,D>* successor(node_tr<T,D>* x);
-	node_tr<T,D>* predecessor(node_tr<T,D>* x);
-	node_tr<T,D>* min(node_tr<T,D>* x); 			//min at subtree x
-	node_tr<T,D>* max(node_tr<T,D>* x); 			//max at subtree x
-	void insert(node_tr<T,D>* x);
-	void remove(node_tr<T,D>* z);
-	void transplant(node_tr<T,D>* u, node_tr<T,D>* v);
+	node_au<T,D>* Min;
+	node_au<T,D>* Max;
+
+	node_au<T,D>* search_r(T key, node_au<T,D>* ptr);
+	node_au<T,D>* search_i(T key);
+	node_au<T,D>* successor(node_au<T,D>* x);
+	node_au<T,D>* predecessor(node_au<T,D>* x);
+	node_au<T,D>* min(node_au<T,D>* x); 			//min at subtree x
+	node_au<T,D>* max(node_au<T,D>* x); 			//max at subtree x
+	void insert(node_au<T,D>* x);
+	void remove(node_au<T,D>* z);
+	void transplant(node_au<T,D>* u, node_au<T,D>* v);
 
 public:
-	~BinarySearchTree();
+	~BSAUTree();
+	BSAUTree();
 	void Insert(T key, D data);
 	bool Search(T key, D& data);
 	bool Search_and_Delete(T key, D& data);
 	bool Delete(T key);
 	void inorder_tree_walk_i();
-	void inorder_tree_walk_r(node_tr<T,D>* x);
+	void inorder_tree_walk_r(node_au<T,D>* x);
 };
 
 template <class T, class D>
-void BinarySearchTree<T,D>::transplant(node_tr<T,D>* u, node_tr<T,D>* v)
+void BSAUTree<T,D>::transplant(node_au<T,D>* u, node_au<T,D>* v)
 {
 	if(u->parent == nullptr)
 	{
@@ -76,7 +82,7 @@ void BinarySearchTree<T,D>::transplant(node_tr<T,D>* u, node_tr<T,D>* v)
 }
 
 template <class T, class D>
-void BinarySearchTree<T,D>::remove(node_tr<T,D>* z)
+void BSAUTree<T,D>::remove(node_au<T,D>* z)
 {
 	if(z->left == nullptr)
 		transplant(z, z->right);
@@ -84,7 +90,7 @@ void BinarySearchTree<T,D>::remove(node_tr<T,D>* z)
 		transplant(z,z->right);
 	else
 	{
-		node_tr<T,D>* y = min(z->right);
+		node_au<T,D>* y = min(z->right);
 		if(y->parent != z)
 		{
 			transplant(y, y->right);
@@ -99,9 +105,9 @@ void BinarySearchTree<T,D>::remove(node_tr<T,D>* z)
 }
 
 template <class T, class D>
-bool BinarySearchTree<T,D>::Delete(T key)
+bool BSAUTree<T,D>::Delete(T key)
 {
-	node_tr<T,D>* x = search_i(key);
+	node_au<T,D>* x = search_i(key);
 	if(x == nullptr) 
 	{
 		return false;
@@ -114,8 +120,10 @@ bool BinarySearchTree<T,D>::Delete(T key)
 }
 
 template <class T, class D>
-node_tr<T,D>* BinarySearchTree<T,D>::min(node_tr<T,D>* x)
+node_au<T,D>* BSAUTree<T,D>::min(node_au<T,D>* x)
 {
+	if(x == this->root)
+		return Min;
 	if(x == nullptr)
 		return x;
 	while(x->left != nullptr)
@@ -126,8 +134,10 @@ node_tr<T,D>* BinarySearchTree<T,D>::min(node_tr<T,D>* x)
 }
 
 template <class T, class D>
-node_tr<T,D>* BinarySearchTree<T,D>::max(node_tr<T,D>* x)
+node_au<T,D>* BSAUTree<T,D>::max(node_au<T,D>* x)
 {
+	if(x == this->root)
+		return Max;
 	if(x == nullptr)
 		return x;
 	while(x->right != nullptr)
@@ -138,13 +148,13 @@ node_tr<T,D>* BinarySearchTree<T,D>::max(node_tr<T,D>* x)
 }
 
 template <class T, class D>
-node_tr<T,D>* BinarySearchTree<T,D>::successor(node_tr<T,D>* x)
+node_au<T,D>* BSAUTree<T,D>::successor(node_au<T,D>* x)
 {
 	if(x->right != nullptr)
 	{
 		return min(x->right);
 	}
-	node_tr<T,D>* y = x->parent;
+	node_au<T,D>* y = x->parent;
 	while (y != nullptr && x == y->right)
 	{
 		x = y;
@@ -154,13 +164,13 @@ node_tr<T,D>* BinarySearchTree<T,D>::successor(node_tr<T,D>* x)
 }
 
 template <class T, class D>
-node_tr<T,D>* BinarySearchTree<T,D>::predecessor(node_tr<T,D>* x)
+node_au<T,D>* BSAUTree<T,D>::predecessor(node_au<T,D>* x)
 {
 	if(x->left != nullptr)
 	{
 		return max(x->left);
 	}
-	node_tr<T,D>* y = x->parent;
+	node_au<T,D>* y = x->parent;
 	while (y != nullptr && x == y->left)
 	{
 		x = y;
@@ -170,9 +180,9 @@ node_tr<T,D>* BinarySearchTree<T,D>::predecessor(node_tr<T,D>* x)
 }
 
 template <class T, class D>
-void BinarySearchTree<T,D>::insert(node_tr<T,D>* z)
+void BSAUTree<T,D>::insert(node_au<T,D>* z)
 {
-	node_tr<T,D>* x, *y;
+	node_au<T,D>* x, *y;
 	x = this->root; y = nullptr;
 	while(x != nullptr)
 	{
@@ -184,16 +194,46 @@ void BinarySearchTree<T,D>::insert(node_tr<T,D>* z)
 	}
 	z->parent = y;
 	if(y == nullptr)
+	{	
+		Min = z;
+		Max = z;
 		this->root = z;
+		return;
+	}
 	else if(z->key < y->key)
 		y->left = z;
 	else
-		y->right = z; 
+		y->right = z;
+
+	y = successor(z);
+	x = predecessor(z);
+
+	if(x == nullptr)
+	{
+		Min = z;
+		z->succ = y;
+		z->succ->pred = z;
+		//z->pred = nullptr;
+	}
+	else if(y == nullptr)
+	{
+		Max = z;
+		z->pred = x;
+		z->pred->succ = z;
+		//z->succ = nullptr;
+	}
+	else
+	{
+		z->succ = y;
+		z->pred = x;
+		x->succ = z;
+		y->pred = z;
+	}
 }
 
 
 template<class T, class D>
-void BinarySearchTree<T,D>::inorder_tree_walk_r(node_tr<T,D>* x)
+void BSAUTree<T,D>::inorder_tree_walk_r(node_au<T,D>* x)
 {
 	if(x != nullptr)
 	{
@@ -207,7 +247,7 @@ void BinarySearchTree<T,D>::inorder_tree_walk_r(node_tr<T,D>* x)
 
 
 template<class T, class D>
-node_tr<T,D>* BinarySearchTree<T,D>::search_r(T key, node_tr<T,D>* ptr)
+node_au<T,D>* BSAUTree<T,D>::search_r(T key, node_au<T,D>* ptr)
 {
 	if(ptr == nullptr || ptr->key == key ) return ptr;
 	if(key < ptr->key)
@@ -221,9 +261,9 @@ node_tr<T,D>* BinarySearchTree<T,D>::search_r(T key, node_tr<T,D>* ptr)
 }
 
 template<class T, class D>
-node_tr<T,D>* BinarySearchTree<T,D>::search_i(T key)
+node_au<T,D>* BSAUTree<T,D>::search_i(T key)
 {
-	node_tr<T,D>* x = this->root;
+	node_au<T,D>* x = this->root;
 	while(x != nullptr && x->key != key)
 	{
 		if(key > x->key)
@@ -236,9 +276,9 @@ node_tr<T,D>* BinarySearchTree<T,D>::search_i(T key)
 
 
 template<class T, class D>
-bool BinarySearchTree<T,D>::Search(T key, D& data)
+bool BSAUTree<T,D>::Search(T key, D& data)
 {
-	node_tr<T,D>* x = search_i(key);
+	node_au<T,D>* x = search_i(key);
 	if(x == nullptr)
 	{
 		return false;
@@ -252,9 +292,9 @@ bool BinarySearchTree<T,D>::Search(T key, D& data)
 
 
 template<class T, class D>
-bool BinarySearchTree<T,D>::Search_and_Delete(T key, D& data)
+bool BSAUTree<T,D>::Search_and_Delete(T key, D& data)
 {
-	node_tr<T,D>* x = search_i(key);
+	node_au<T,D>* x = search_i(key);
 	if(x == nullptr)
 	{
 		return false;
@@ -268,16 +308,16 @@ bool BinarySearchTree<T,D>::Search_and_Delete(T key, D& data)
 }
 
 template<class T, class D>
-void BinarySearchTree<T,D>::Insert(T key, D data)
+void BSAUTree<T,D>::Insert(T key, D data)
 {
-	node_tr<T,D>* x = new node_tr<T,D>(key, data);
+	node_au<T,D>* x = new node_au<T,D>(key, data);
 	insert(x);
 	this->size++;
 }
 
 /*
 template<class T, class D>
-void BinarySearchTree<T,D>::inorder_tree_walk_i()
+void BSAUTree<T,D>::inorder_tree_walk_i()
 {
 
 	//отматываем налево до упора, печатаем
@@ -290,8 +330,8 @@ void BinarySearchTree<T,D>::inorder_tree_walk_i()
 		return;
 	}
 
-	node_tr<T,D>* x = this->root;
-	node_tr<T,D>* visited = nullptr;
+	node_au<T,D>* x = this->root;
+	node_au<T,D>* visited = nullptr;
 
 	while(x->left != nullptr)
 	{
@@ -328,23 +368,19 @@ void BinarySearchTree<T,D>::inorder_tree_walk_i()
 */
 
 template<class T, class D>
-void BinarySearchTree<T,D>::inorder_tree_walk_i()
+void BSAUTree<T,D>::inorder_tree_walk_i()
 {
-	node_tr<T,D>* x = min(this->root);
+	node_au<T,D>* x = min(this->root);
 	std::cout << x->key << std::endl;
 	for(int i = 0; i < this->size-1; i++)
 	{
-		x = successor(x);
-		if(x != nullptr)
-		{
-			std::cout << x->key << std::endl; 
-		}
-		else return;
+		x = x->succ;
+		std::cout << x->key << std::endl; 
 	}
 }
 
 template <class T, class D>
-node_tr<T,D>* find_leaf(node_tr<T,D>* x)
+node_au<T,D>* find_leaf(node_au<T,D>* x)
 {
 	while(x->left != nullptr || x->right != nullptr)
 	{
@@ -357,10 +393,10 @@ node_tr<T,D>* find_leaf(node_tr<T,D>* x)
 }
 
 template <class T, class D>
-BinarySearchTree<T,D>::~BinarySearchTree()
+BSAUTree<T,D>::~BSAUTree()
 {
-	node_tr<T,D>* x = nullptr;
-	node_tr<T,D>* y = this->root;
+	node_au<T,D>* x = nullptr;
+	node_au<T,D>* y = this->root;
 	while(y != nullptr)
 	{
 		x = find_leaf(y);
@@ -375,4 +411,8 @@ BinarySearchTree<T,D>::~BinarySearchTree()
 		delete x;
 	}
 }
+
+template <class T, class D>
+BSAUTree<T,D>::BSAUTree() : Min(nullptr), Max(nullptr) {}
+
 

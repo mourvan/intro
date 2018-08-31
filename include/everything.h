@@ -15,3 +15,5 @@
 #include "binary_search_tree.h"
 #include "red_black_tree.h"
 #include "order_statistic_tree.h"
+#include "binary_search_tree_aug.h" //augmented to have O(1) Successor, Min, Max, Predecessor, deletion NOT COMPLETED
+#include "interval_tree.h"

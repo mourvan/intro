@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <limits>
 
 #include "include/everything.h"
 
@@ -102,16 +103,35 @@ int main()
 	srand(time(NULL));
 	//BinarySearchTree<int, int> tr;
 	OSTree<int, int> tr;
-	std::vector<int> lol= {10,8,12,7,9,11,13};
+	std::vector<int> lol= {10,8 ,12,7,9 ,11,13};
+	std::vector<int> kek= {14,16,13,8,20,12,19};
 	for(int i = 0; i < (int)lol.size(); i++)
 	{
 		tr.Insert(lol[i], lol[i]);
 	}
 	for(int i = 0; i < (int)lol.size(); i++)
 	{
-		cout << tr.Rank(lol[i]) << endl;
+	//	cout << tr.Rank(lol[i]) << endl;
 	}
-	
+
+	BSAUTree<int,int> at;
+	for(int i = 0; i < (int)lol.size(); i++)
+	{
+		at.Insert(lol[i], lol[i]);
+	}
+	at.inorder_tree_walk_i();
+
+	IntervalTree<int,int> it;
+	for(int i = 0; i < (int)lol.size(); i++)
+	{
+		it.Insert(lol[i],kek[i],lol[i]);
+	}
+	it.inorder_tree_walk_i();
+	interval<int> in(3,4);
+	if(it.isOverlapped(in, kek[1]))
+		cout << "is overlapped" << endl;
+	else
+		cout << "not overlapped" << endl;
 	//RBTree<int, int> rbt;
 
 	//tr.inorder_tree_walk_i();
